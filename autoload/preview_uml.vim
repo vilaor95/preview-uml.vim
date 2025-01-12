@@ -56,19 +56,24 @@ function! s:update() abort
     return
   endif
 
-  let cmd = printf('curl -X POST -s -i %s/form -d "text=%s"', s:url,
-        \ escape(join(body, "\n"), '"'))
+  let cmd = printf('docker run -v %s:/data plantuml/plantuml -ttxt %s', expand("%:p:h"), expand("%"))
   let resp = systemlist(cmd)
-  let location = filter(resp, 'v:val =~ "Location"')
-  if empty(location)
-    call <SID>echo_err('invalid response')
-    call s:win_execute(s:preview.winid, 'bw!')
-    augroup preview_uml | au! | augroup END
-    return
-  endif
 
-  let url = substitute(trim(location[0][10:]), 'uml', 'txt', 'g')
-  let resp = systemlist(printf('curl -s %s', url))
+  "let cmd = printf('curl -X POST -s -i %s/form -d "text=%s"', s:url,
+  "      \ escape(join(body, "\n"), '"'))
+  "let resp = systemlist(cmd)
+  "let location = filter(resp, 'v:val =~ "Location"')
+  "if empty(location)
+  "  call <SID>echo_err('invalid response')
+  "  call s:win_execute(s:preview.winid, 'bw!')
+  "  augroup preview_uml | au! | augroup END
+  "  return
+  "endif
+
+  "let url = substitute(trim(location[0][10:]), 'uml', 'txt', 'g')
+  "let resp = systemlist(printf('curl -s %s', url))
+
+  let resp = readfile(expand("%:r") . ".atxt")
 
   call s:win_execute(s:preview.winid, '%d_')
   call setbufline(s:preview.bufid, 1, resp)
